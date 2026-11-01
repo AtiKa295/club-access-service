@@ -17,12 +17,6 @@ import java.util.UUID;
 public class ClubAccessController {
     private final IClubAccessService clubAccessService;
 
-    @PostMapping("/members")
-    public ResponseEntity<MemberResponse> registerMember(@RequestBody CreateMemberRequest request) {
-        MemberResponse response = clubAccessService.registerMember(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
     @PostMapping("/check-in")
     public ResponseEntity<AccessResponse> checkIn(@RequestParam UUID code) {
         AccessResponse response = clubAccessService.checkIn(code);
