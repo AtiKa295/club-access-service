@@ -5,6 +5,7 @@ import com.example.clubaccess.dto.MemberResponse;
 import com.example.clubaccess.dto.UpdateMemberRequest;
 import com.example.clubaccess.entity.Member;
 import com.example.clubaccess.service.IClubAccessService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ public class MemberController {
     private final IClubAccessService service;
 
     @PostMapping
-    public ResponseEntity<MemberResponse>  createMember(@RequestBody CreateMemberRequest request) {
+    public ResponseEntity<MemberResponse>  createMember(@Valid @RequestBody CreateMemberRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.registerMember(request));
     }
 
@@ -44,6 +45,7 @@ public class MemberController {
     @PutMapping("/{id}")
     public ResponseEntity<MemberResponse> updateMember(
             @PathVariable Long id,
+            @Valid
             @RequestBody UpdateMemberRequest request
             ) {
         return ResponseEntity.ok(service.updateMember(id, request));
