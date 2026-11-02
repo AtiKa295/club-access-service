@@ -10,11 +10,13 @@ import com.example.clubaccess.repository.IMemberRepository;
 import com.example.clubaccess.repository.IQrCodeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ClubAccessService implements IClubAccessService{
@@ -24,6 +26,8 @@ public class ClubAccessService implements IClubAccessService{
 
     @Override
     public MemberResponse registerMember(CreateMemberRequest request) {
+        log.info("Регистрация нового участника с именем: {}", request.fullName());
+
         Member member = new Member();
         UUID code = UUID.randomUUID();
         member.setFullName(request.fullName());
@@ -33,16 +37,21 @@ public class ClubAccessService implements IClubAccessService{
 
         Member savedMember = memberRepository.save(member);
 
+        log.info("Участник успешно зарегистрирован с ID: {}", savedMember.getId());
+
         return new MemberResponse(savedMember.getId(), savedMember.getFullName(), code);
     }
 
     @Transactional
     @Override
     public AccessResponse checkIn(UUID qrCode) {
+
+        log.info("Запрос на вход по QR-коду: {}", qrCode);
         QrCode currentCode = qrCodeRepository.findByCode(qrCode)
                 .orElseThrow(() -> new IllegalArgumentException("Qr-код не найден!"));
 
         if (!currentCode.isActive()) {
+            log.warn("Попытка входа по неактивному QR-коду :{}", qrCode);
             throw new IllegalStateException("QR-код уже был использован!");
         }
 
@@ -51,6 +60,8 @@ public class ClubAccessService implements IClubAccessService{
         UUID newCode = UUID.randomUUID();
         member.addQrCode(new QrCode(newCode));
         memberRepository.save(member);
+
+        log.info("Успешный проход! Старый код {} деактивирован, выдан новый: {}", qrCode, newCode);
 
         return new AccessResponse(member.getFullName(), newCode, "Вход разрешен");
     }
