@@ -17,10 +17,20 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(ex.getMessage()));
     }
 
-//    @ExceptionHandler({MethodArgumentNotValidException.class})
-//    public ResponseEntity<ErrorResponse> handleValidationExceptons(MethodArgumentNotValidException ex) {
-//        FieldError fieldError = ex.getBindingResult().getFieldError();
-//
-////        if (field)
-//    }
+    @ExceptionHandler({MethodArgumentNotValidException.class})
+    public ResponseEntity<ErrorResponse> handleValidationExceptons(MethodArgumentNotValidException ex) {
+        FieldError fieldError = ex.getBindingResult().getFieldError();
+
+
+        String message;
+        if (fieldError != null) {
+            message = fieldError.getDefaultMessage();
+        } else {
+            message = "Ошибка валидации";
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(message));
+    }
 }

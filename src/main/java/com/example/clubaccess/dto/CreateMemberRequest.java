@@ -4,6 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 
 import java.util.UUID;
 
-@NotBlank
-public record CreateMemberRequest(String fullName) {
+
+public record CreateMemberRequest(
+        @NotBlank(message = "Имя не должно быть пустным")
+        String fullName
+) {
 }

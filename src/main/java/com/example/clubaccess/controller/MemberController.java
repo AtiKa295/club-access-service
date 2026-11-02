@@ -28,7 +28,10 @@ public class MemberController {
     private final IClubAccessService service;
 
     @PostMapping
-    public ResponseEntity<MemberResponse>  createMember(@Valid @RequestBody CreateMemberRequest request) {
+    public ResponseEntity<MemberResponse>  createMember(
+            @Valid
+            @RequestBody
+            CreateMemberRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.registerMember(request));
     }
 
