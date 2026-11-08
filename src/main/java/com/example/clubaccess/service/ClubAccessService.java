@@ -68,7 +68,7 @@ public class ClubAccessService implements IClubAccessService{
 
     @Override
     public List<MemberResponse> getAllMembers() {
-        return memberRepository.findAllWithQrcodes.stream()
+        return memberRepository.findAllWithQrCodes().stream()
                 .map(this::mapToResponse)
                 .toList();
     }
@@ -98,6 +98,44 @@ public class ClubAccessService implements IClubAccessService{
             throw new IllegalArgumentException("Участник с таким id: " + id + " не найден");
         }
         memberRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public UUID createQrCodeFOrMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("Участник с Id: " + memberId + " не найден!"));
+
+        UUID newCode = UUID.randomUUID();
+        QrCode qrCode = new QrCode(newCode);
+        member.addQrCode(qrCode);
+        memberRepository.save(member);
+
+        return newCode;
+    }
+
+    @Override
+    @Transactional
+    public void updateQrCodeStatus(Long qrCodeId, boolean active) {
+        QrCode qrCode = qrCodeRepository.findById(qrCodeId)
+                .orElseThrow(() -> new IllegalArgumentException("QR-код с ID:" + qrCodeId + " не найден!"));
+
+        qrCode.setActive(active);
+        qrCodeRepository.save(qrCode);
+    }
+
+    @Override
+    @Transactional
+    public void deleteQrCode(Long qrCodeId) {
+        QrCode qrCode = qrCodeRepository.findById(qrCodeId)
+                .orElseThrow(() -> new IllegalArgumentException("QR-код с ID:" + qrCodeId + " не найден!"));
+
+        Member member = qrCode.getMember();
+        if (member != null) {
+            member.getQrCodes().remove(qrCode);
+        }
+
+        qrCodeRepository.delete(qrCode);
     }
 
     private MemberResponse mapToResponse(Member member) {

@@ -15,4 +15,7 @@ public interface IClubAccessService {
     MemberResponse getMemberById(Long id);
     MemberResponse updateMember(Long id, UpdateMemberRequest request);
     void deleteMember(Long id);
+    UUID createQrCodeFOrMember(Long memberId);
+    void updateQrCodeStatus(Long qrCodeId, boolean active);
+    void deleteQrCode (Long qrCodeId);
 }

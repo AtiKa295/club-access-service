@@ -22,4 +22,24 @@ public class ClubAccessController {
         AccessResponse response = clubAccessService.checkIn(code);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/members/{memberId}/qrcodes")
+    public ResponseEntity<UUID> createQrCode(@PathVariable Long memberId) {
+        UUID newCode = clubAccessService.createQrCodeFOrMember(memberId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newCode);
+    }
+
+    @PatchMapping("/qrcodes/{qrCodeId}")
+    public ResponseEntity<Void> updateQrCodeStatus(
+            @PathVariable Long qrCodeId,
+            @RequestParam boolean active) {
+        clubAccessService.updateQrCodeStatus(qrCodeId, active);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/qrcodes/{qrCodeId}")
+    public ResponseEntity<Void> deleteQrCode(@PathVariable Long qrCodeId) {
+        clubAccessService.deleteQrCode(qrCodeId);
+        return ResponseEntity.noContent().build();
+    }
 }
