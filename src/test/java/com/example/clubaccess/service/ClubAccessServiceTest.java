@@ -82,6 +82,41 @@ public class ClubAccessServiceTest {
         org.mockito.Mockito.verifyNoInteractions(memberRepository);
     }
 
+    @Test
+    void checkIn_ShouldDeactiveOldCode_CreateNewCode_AndRejectReuse() {
+        UUID oldCodeCalue = UUID.randomUUID();
+
+        Member member = new Member();
+        member.setId(1L);
+        member.setFullName("Михаил Устюгов");
+
+        QrCode oldQrCode = new QrCode(oldCodeCalue);
+        member.addQrCode(oldQrCode);
+
+        org.mockito.Mockito.when(qrCodeRepository.findByCode(oldCodeCalue))
+                .thenReturn(java.util.Optional.of(oldQrCode));
+
+
+        AccessResponse response = clubAccessService.checkIn(oldCodeCalue);
+
+        org.junit.jupiter.api.Assertions.assertNotNull(response);
+        org.junit.jupiter.api.Assertions.assertEquals("Вход разрешен", response.message());
+        org.junit.jupiter.api.Assertions.assertNotNull(response.newQrCode());
+        org.junit.jupiter.api.Assertions.assertNotEquals(oldCodeCalue, response.newQrCode());
+        org.junit.jupiter.api.Assertions.assertFalse(oldQrCode.isActive(), "Старый QR-код должен быть деактивирован");
+
+        org.junit.jupiter.api.Assertions.assertEquals(2, member.getQrCodes().size());
+        boolean hasNewActiveCode = member.getQrCodes().stream()
+                .anyMatch(q -> q.getCode().equals(response.newQrCode()) && q.isActive());
+        org.junit.jupiter.api.Assertions.assertTrue(hasNewActiveCode, "Новый код должен быть добавлен в список участника и быть активным");
+
+        org.junit.jupiter.api.Assertions.assertThrows(
+                IllegalStateException.class,
+                () -> clubAccessService.checkIn(oldCodeCalue),
+                "Повторное использование кода должно приводить к ошибке"
+        );
+    }
+
 }
 
 
