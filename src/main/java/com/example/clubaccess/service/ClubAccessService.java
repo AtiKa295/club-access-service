@@ -46,12 +46,12 @@ public class ClubAccessService implements IClubAccessService{
     @Override
     public AccessResponse checkIn(UUID qrCode) {
 
-        log.info("Запрос на вход по QR-коду: {}", qrCode);
+        log.info("Запрос на вход по QR-коду");
         QrCode currentCode = qrCodeRepository.findByCode(qrCode)
                 .orElseThrow(() -> new IllegalArgumentException("Qr-код не найден!"));
 
         if (!currentCode.isActive()) {
-            log.warn("Попытка входа по неактивному QR-коду :{}", qrCode);
+            log.warn("Попытка входа по неактивному QR-коду");
             throw new IllegalStateException("QR-код уже был использован!");
         }
 
@@ -61,7 +61,7 @@ public class ClubAccessService implements IClubAccessService{
         member.addQrCode(new QrCode(newCode));
         memberRepository.save(member);
 
-        log.info("Успешный проход! Старый код {} деактивирован, выдан новый: {}", qrCode, newCode);
+        log.info("Успешный проход! Старый код деактивирован, выдан новый");
 
         return new AccessResponse(member.getFullName(), newCode, "Вход разрешен");
     }
