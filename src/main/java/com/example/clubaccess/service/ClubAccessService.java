@@ -106,6 +106,13 @@ public class ClubAccessService implements IClubAccessService{
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("Участник с Id: " + memberId + " не найден!"));
 
+        boolean hasActiveQr = member.getQrCodes().stream()
+                .anyMatch(QrCode::isActive);
+
+        if (hasActiveQr) {
+            throw new IllegalStateException("У участника уже есть активный куар");
+        }
+
         UUID newCode = UUID.randomUUID();
         QrCode qrCode = new QrCode(newCode);
         member.addQrCode(qrCode);
@@ -119,6 +126,18 @@ public class ClubAccessService implements IClubAccessService{
     public void updateQrCodeStatus(Long qrCodeId, boolean active) {
         QrCode qrCode = qrCodeRepository.findById(qrCodeId)
                 .orElseThrow(() -> new IllegalArgumentException("QR-код с ID:" + qrCodeId + " не найден!"));
+
+        if (active) {
+            Member member = qrCode.getMember();
+            if (member != null) {
+                boolean hasAnotherActiveQr = member.getQrCodes().stream()
+                        .anyMatch(q -> q.isActive() && !q.getId().equals(qrCodeId));
+
+                if (hasAnotherActiveQr) {
+                    throw new IllegalStateException("У участника уже сущетсвует другой Qr");
+                }
+            }
+        }
 
         qrCode.setActive(active);
         qrCodeRepository.save(qrCode);
