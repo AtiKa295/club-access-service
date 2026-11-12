@@ -44,7 +44,7 @@ public class ClubAccessService implements IClubAccessService{
 
     @Transactional
     @Override
-    public synchronized AccessResponse checkIn(UUID qrCode) {
+    public AccessResponse checkIn(UUID qrCode) {
 
         log.info("Запрос на вход по QR-коду");
         QrCode currentCode = qrCodeRepository.findByCode(qrCode)
