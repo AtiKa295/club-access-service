@@ -117,6 +117,52 @@ public class ClubAccessServiceTest {
         );
     }
 
+    @Test
+    void createQrCodeForMember_WhenMemberAlreadyHasActiveQr_ShouldThrowException() {
+        Long memberId = 1L;
+        Member member = new Member();
+        org.springframework.test.util.ReflectionTestUtils.setField(member, "id", memberId);
+        member.setFullName("Виктория Устюгова");
+
+        QrCode existingActiveQr = new QrCode(UUID.randomUUID());
+        member.addQrCode(existingActiveQr);
+
+        org.mockito.Mockito.when(memberRepository.findById(memberId))
+                .thenReturn(java.util.Optional.of(member));
+
+        org.junit.jupiter.api.Assertions.assertThrows(
+                IllegalStateException.class,
+                () -> clubAccessService.createQrCodeFOrMember(memberId),
+                "Нельзч создать второй активный Qr-код, если у участика он уже есть"
+        );
+    }
+
+    @Test
+    void UpdateQrCodeStatus_WhenActivatingSecondQrForMember_ShouldThrowException() {
+        Member member = new Member();
+        org.springframework.test.util.ReflectionTestUtils.setField(member, "id", 1L);
+        member.setFullName("Михаил Устюгов");
+
+        QrCode activeQr = new QrCode(UUID.randomUUID());
+        org.springframework.test.util.ReflectionTestUtils.setField(activeQr, "id", 10L);
+        activeQr.setActive(true);
+        member.addQrCode(activeQr);
+
+        QrCode inactiveQr = new QrCode(UUID.randomUUID());
+        org.springframework.test.util.ReflectionTestUtils.setField(inactiveQr, "id", 20L);
+        inactiveQr.setActive(false);
+        member.addQrCode(inactiveQr);
+
+        org.mockito.Mockito.when(qrCodeRepository.findById(20L))
+                .thenReturn(java.util.Optional.of(inactiveQr));
+
+        org.junit.jupiter.api.Assertions.assertThrows(
+                IllegalStateException.class,
+                () -> clubAccessService.updateQrCodeStatus(20L, true),
+                "Нельзя активировать Qr-код, если у участника уже есть активный Qr"
+        );
+    }
+
 }
 
 
