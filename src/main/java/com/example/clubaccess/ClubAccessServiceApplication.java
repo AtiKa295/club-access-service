@@ -11,3 +11,5 @@ public class ClubAccessServiceApplication {
 	}
 
 }
+
+//0591c31e-8b86-4cf7-95ec-1ae8acc5cbdd
